@@ -1,0 +1,55 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    field.cattle.io/targetWorkloadIds: '["proxy/squid"]'
+    management.cattle.io/ui-managed: 'true'
+  creationTimestamp: '2025-03-26T02:54:51Z'
+  managedFields:
+    - apiVersion: v1
+      fieldsType: FieldsV1
+      fieldsV1:
+        f:metadata:
+          f:annotations:
+            .: {}
+            f:field.cattle.io/targetWorkloadIds: {}
+            f:management.cattle.io/ui-managed: {}
+        f:spec:
+          f:internalTrafficPolicy: {}
+          f:ports:
+            .: {}
+            k:{"port":3128,"protocol":"TCP"}:
+              .: {}
+              f:name: {}
+              f:port: {}
+              f:protocol: {}
+              f:targetPort: {}
+          f:selector: {}
+          f:sessionAffinity: {}
+          f:type: {}
+      manager: rancher
+      operation: Update
+      time: '2025-03-27T14:14:55Z'
+  name: squid
+  namespace: proxy
+  resourceVersion: '963930'
+  uid: b8cfeb53-9c8e-4250-8cca-3ee183614c42
+spec:
+  clusterIP: 10.43.243.125
+  clusterIPs:
+    - 10.43.243.125
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+    - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+    - name: squid
+      port: 3128
+      protocol: TCP
+      targetPort: 3128
+  selector:
+    workload.user.cattle.io/workloadselector: apps.deployment-proxy-squid
+  sessionAffinity: None
+  type: ClusterIP
+status:
+  loadBalancer: {}
