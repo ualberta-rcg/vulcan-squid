@@ -1,0 +1,41 @@
+apiVersion: v1
+data:
+  cache.conf: >
+    cache_dir aufs /cache 100000 16 256
+
+    cache_mem 32768 MB
+
+    maximum_object_size 5120 MB
+
+    minimum_object_size 0 KB
+
+    cache_replacement_policy heap LFUDA
+
+    memory_replacement_policy heap LFUDA
+
+
+    workers 8                         # Adjust based on CPU cores
+
+    ipcache_size 4096                 # Larger IP cache
+
+    ipcache_low 90                    # Keep 90% on low memory
+
+    ipcache_high 95                   # Clear at 95%
+
+
+    client_db on                      # Track client performance
+
+    pipeline_prefetch on              # Prefetch pipelined requests
+
+    collapsed_forwarding on           # Collapse identical requests
+
+
+    refresh_pattern ^/cvmfs/          0       5%      43200  # 30 days max
+    freshness
+
+    refresh_pattern .                 0       10%     10080  # 7 days default
+    for other content
+kind: ConfigMap
+metadata:
+  name: cache-config
+  namespace: proxy
