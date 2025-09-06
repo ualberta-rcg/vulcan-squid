@@ -1,0 +1,39 @@
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  annotations:
+    objectset.rio.cattle.io/applied: >-
+      H4sIAAAAAAAA/3zQu27rMAwG4HfhbPvI19jesp+hU5ciAylRjVpZMkwiQBHk3QulQ7eOvH0g/jvgHl75kJATrLCxYozUhPzv1hIrtlDBZ0gOVvjfnd2NDw3CGyeF6rntUBHWO2BKWVFDTlLKTB9sVVibI+TGomrkooYi9WM7OuOX2vthqgdPp5rQT3U/Ei/U9n5aDDwqiEgc/+SuKNcCUneal5lGZ4fZziObfu79MmF3mmnwQxF70/qCJtwYVniPmTDW6G7w05MdLf9GUMuXKG/lQna25YmQlA+PlgXWN6CcnGk6YwxcKgj72bmDRV5yjs+5S1LvOUe4PB7fAQAA//9JMKf1ZgEAAA
+    objectset.rio.cattle.io/id: 3515d0f9-ff46-4fb7-baf6-35be9b13f690
+  creationTimestamp: '2025-04-08T00:43:48Z'
+  generation: 1
+  labels:
+    objectset.rio.cattle.io/hash: 3b27898b5dc48c85e0383f96a278b4f43f69301f
+  managedFields:
+    - apiVersion: metallb.io/v1beta1
+      fieldsType: FieldsV1
+      fieldsV1:
+        f:metadata:
+          f:annotations:
+            .: {}
+            f:objectset.rio.cattle.io/applied: {}
+            f:objectset.rio.cattle.io/id: {}
+          f:labels:
+            .: {}
+            f:objectset.rio.cattle.io/hash: {}
+        f:spec:
+          .: {}
+          f:interfaces: {}
+          f:ipAddressPools: {}
+      manager: rancher
+      operation: Update
+      time: '2025-04-08T00:43:48Z'
+  name: squid-adv
+  namespace: metallb-system
+  resourceVersion: '5838155'
+  uid: 06ab8e16-d783-4d25-8715-78fca637904d
+spec:
+  interfaces:
+    - bond0.2000
+  ipAddressPools:
+    - squid-pool
