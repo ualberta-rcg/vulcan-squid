@@ -22,7 +22,6 @@ spec:
       port: 3128
       protocol: TCP
       targetPort: 3128
-      nodePort: 32030
   selector:
     app: squid
   sessionAffinity: None

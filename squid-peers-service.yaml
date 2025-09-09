@@ -6,17 +6,16 @@ metadata:
   name: squid-peers
   namespace: proxy
 spec:
-  type: NodePort
+  type: ClusterIP
+  clusterIP: None  # Headless service for peer discovery
   ports:
     - name: http-proxy
       port: 3128
       protocol: TCP
       targetPort: 3128
-      nodePort: 30000
     - name: icp
       port: 3130
       protocol: TCP
       targetPort: 3130
-      nodePort: 30001
   selector:
     app: squid
