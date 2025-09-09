@@ -10,4 +10,3 @@ spec:
     - 172.26.92.11-172.26.92.11  # Single IP for Squid LoadBalancer
   autoAssign: true
   avoidBuggyIPs: false
-  serviceAllocationStrategy: "random"
