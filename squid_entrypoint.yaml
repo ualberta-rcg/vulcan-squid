@@ -48,6 +48,7 @@ data:
     
     # Include additional configuration files
     include /etc/squid/conf.d/*.conf
+    include /tmp/squid-conf/*.conf
     
     # Deny all other access
     http_access deny all
@@ -97,11 +98,12 @@ data:
     HTTP_PORT="${HTTP_PORT:-3128}"
     ICP_PORT="${ICP_PORT:-3130}"   # if using HTCP set 4827 and add " htcp" below
     INTERVAL="${INTERVAL:-15}"
-    OUT_DIR="/etc/squid/conf.d"
+    OUT_DIR="/tmp/squid-conf"
     OUT_FILE="$OUT_DIR/99-peers.conf"
     TMP_FILE="$(mktemp)"
     MYIP="${MY_POD_IP:-$(hostname -i | awk '{print $1}')}"
 
+    mkdir -p "$OUT_DIR"
     [ -f "$OUT_FILE" ] || : > "$OUT_FILE"
 
     resolve_ips() {
