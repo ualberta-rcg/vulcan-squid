@@ -54,7 +54,7 @@ data:
     http_access deny all
     
     # HTTP proxy port with high concurrency settings
-    http_port 31234
+    http_port 3128
 
     # ICP port for cache peer
     icp_port 31235
@@ -97,7 +97,7 @@ data:
     set -eu
 
     SERVICE_DNS="${SERVICE_DNS:-squid-peers.squid-standard.svc.cluster.local}"
-    HTTP_PORT="${HTTP_PORT:-31234}"
+    HTTP_PORT="${HTTP_PORT:-3128}"
     ICP_PORT="${ICP_PORT:-31235}"   # if using HTCP set 4827 and add " htcp" below
     INTERVAL="${INTERVAL:-15}"
     OUT_DIR="/tmp/squid-conf"

@@ -13,9 +13,9 @@ spec:
   type: ClusterIP
   ports:
     - name: http-proxy
-      port: 31234
+      port: 3128
       protocol: TCP
-      targetPort: 31234
+      targetPort: 3128
   selector:
     app: squid
   sessionAffinity: None
