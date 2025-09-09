@@ -7,3 +7,7 @@ metadata:
     name: squid-standard
     app: squid
     purpose: proxy-cache
+    # Allow host networking and privileged access
+    pod-security.kubernetes.io/enforce: privileged
+    pod-security.kubernetes.io/audit: privileged
+    pod-security.kubernetes.io/warn: privileged
