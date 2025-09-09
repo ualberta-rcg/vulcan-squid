@@ -92,8 +92,8 @@ data:
     set -eu
 
     SERVICE_DNS="${SERVICE_DNS:-squid-peers.proxy.svc.cluster.local}"
-    HTTP_PORT="${HTTP_PORT:-3128}"
-    ICP_PORT="${ICP_PORT:-3130}"   # if using HTCP set 4827 and add " htcp" below
+    HTTP_PORT="${HTTP_PORT:-31234}"
+    ICP_PORT="${ICP_PORT:-31235}"   # if using HTCP set 4827 and add " htcp" below
     INTERVAL="${INTERVAL:-15}"
     OUT_DIR="/tmp/squid-conf"
     OUT_FILE="$OUT_DIR/99-peers.conf"
