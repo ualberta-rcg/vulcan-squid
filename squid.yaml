@@ -47,29 +47,57 @@ spec:
               name: icp
               protocol: TCP
           
-          # Security context - non-privileged but needs write access for cache
+          # Security context - hardened for production
           securityContext:
             allowPrivilegeEscalation: false
             privileged: false
-            readOnlyRootFilesystem: false
-            runAsNonRoot: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 3128  # Squid user ID
+            runAsGroup: 3128 # Squid group ID
+            capabilities:
+              drop:
+                - ALL
+              add:
+                - NET_BIND_SERVICE  # Required for binding to privileged ports
+            seccompProfile:
+              type: RuntimeDefault
+          
+          # Resource limits for HPC cluster workload
+          resources:
+            requests:
+              memory: "8Gi"      # 8GB minimum for CVMFS caching
+              cpu: "1000m"       # 1 CPU core minimum
+            limits:
+              memory: "32Gi"     # 32GB maximum (adjust based on node memory)
+              cpu: "4000m"       # 4 CPU cores maximum
           
           # Volume mounts for configuration and cache
           volumeMounts:
             - mountPath: /etc/squid/whitelist.txt
               name: squid-whitelist
               subPath: whitelist.txt
+              readOnly: true
             - mountPath: /etc/squid/conf.d/01-whitelist.conf
               name: squid-whitelist
               subPath: whitelist.conf
+              readOnly: true
             - mountPath: /cache
               name: cache-dir
             - mountPath: /etc/squid/conf.d/02-cache.conf
               name: cache-config
               subPath: cache.conf
+              readOnly: true
             - mountPath: /etc/squid/squid.conf
               name: entrypoint
               subPath: squid.conf
+              readOnly: true
+            - mountPath: /var/spool/squid
+              name: squid-spool
+            - mountPath: /var/log/squid
+              name: squid-logs
+            - mountPath: /tmp
+              name: squid-tmp
             - mountpath: /opt/peer-discovery.sh
               name: entrypoint
               subPath: peer-discovery.sh
@@ -84,6 +112,15 @@ spec:
       # Pod configuration
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
+      
+      # Pod security context
+      securityContext:
+        fsGroup: 3128
+        runAsNonRoot: true
+        runAsUser: 3128
+        runAsGroup: 3128
+        seccompProfile:
+          type: RuntimeDefault
       
       # Volumes for configuration and persistent cache
       volumes:
@@ -103,6 +140,17 @@ spec:
           configMap:
             name: entrypoint
             defaultMode: 493
+        - name: squid-spool
+          hostPath:
+            path: /var/lib/squid/spool
+            type: DirectoryOrCreate
+        - name: squid-logs
+          hostPath:
+            path: /var/lib/squid/logs
+            type: DirectoryOrCreate
+        - name: squid-tmp
+          emptyDir:
+            sizeLimit: 1Gi
   
   # Rolling update strategy for zero-downtime updates
   updateStrategy:
