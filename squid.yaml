@@ -96,8 +96,6 @@ spec:
               name: squid-spool
             - mountPath: /tmp
               name: squid-tmp
-            - mountPath: /run
-              name: squid-run
             - mountPath: /opt/peer-discovery.sh
               name: entrypoint
               subPath: peer-discovery.sh
@@ -147,9 +145,6 @@ spec:
         - name: squid-tmp
           emptyDir:
             sizeLimit: 1Gi
-        - name: squid-run
-          emptyDir:
-            sizeLimit: 100Mi
   
   # Rolling update strategy for zero-downtime updates
   updateStrategy:
