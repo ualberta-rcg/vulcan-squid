@@ -41,7 +41,7 @@ spec:
             - name: SERVICE_DNS
               value: squid-peers.squid-standard.svc.cluster.local
           
-          # Ports exposed on host network
+          # Ports exposed on host network (containerPort only for hostNetwork)
           ports:
             - containerPort: 31234
               name: http-proxy

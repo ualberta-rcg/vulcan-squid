@@ -96,7 +96,7 @@ data:
     #!/bin/sh
     set -eu
 
-    SERVICE_DNS="${SERVICE_DNS:-squid-peers.proxy.svc.cluster.local}"
+    SERVICE_DNS="${SERVICE_DNS:-squid-peers.squid-standard.svc.cluster.local}"
     HTTP_PORT="${HTTP_PORT:-31234}"
     ICP_PORT="${ICP_PORT:-31235}"   # if using HTCP set 4827 and add " htcp" below
     INTERVAL="${INTERVAL:-15}"
