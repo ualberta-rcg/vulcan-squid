@@ -82,7 +82,7 @@ spec:
               name: squid-whitelist
               subPath: whitelist.conf
               readOnly: true
-            - mountPath: /cache
+            - mountPath: /var/lib/squid
               name: cache-dir
             - mountPath: /etc/squid/conf.d/02-cache.conf
               name: cache-config
@@ -104,7 +104,11 @@ spec:
             - /bin/sh
             - '-c'
             - |
+              # Initialize cache directories if they don't exist
+              squid -z -f /etc/squid/squid.conf || true
+              # Start peer discovery in background
               /bin/sh /opt/peer-discovery.sh &
+              # Start Squid
               exec entrypoint.sh -f /etc/squid/squid.conf -NYC
       
       # Pod configuration

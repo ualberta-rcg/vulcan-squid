@@ -8,7 +8,7 @@ metadata:
 data:
   cache.conf: |
     # Cache storage configuration for HPC cluster
-    cache_dir aufs /cache 500000 32 512    # 500GB cache, 32 dirs, 512 subdirs
+    cache_dir aufs /var/lib/squid 500000 32 512    # 500GB cache, 32 dirs, 512 subdirs
     
     # Memory cache - 16GB for high performance (adjust based on node memory)
     cache_mem 16384 MB
