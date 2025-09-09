@@ -31,8 +31,6 @@ data:
     client_db on                      # Track client performance
     pipeline_prefetch 2               # Prefetch pipelined requests
     collapsed_forwarding on           # Collapse identical requests
-    store_id_program /usr/lib/squid/storeid_file_rewrite
-    store_id_children 20 startup=10 idle=5 concurrency=0
     
     # Connection limits for high concurrency
     max_filedescriptors 65536

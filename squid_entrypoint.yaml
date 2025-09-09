@@ -54,7 +54,6 @@ data:
     http_access deny all
     
     # HTTP proxy port with high concurrency settings
-    http_port 31234 accel defaultsite=localhost vhost
     http_port 31234
     
     # Core dump directory
