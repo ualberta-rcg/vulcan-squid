@@ -26,10 +26,10 @@ spec:
         - name: squid
           image: ubuntu/squid:latest
           ports:
-            - containerPort: 8080
+            - containerPort: 31234
               name: http-proxy
               protocol: TCP
-            - containerPort: 8081
+            - containerPort: 31235
               name: icp
               protocol: TCP
           securityContext:
@@ -50,7 +50,7 @@ spec:
             - |
               # Create basic Squid config with alternative ports
               cat > /etc/squid/squid.conf << 'EOF'
-              http_port 8080
+              http_port 31234
               acl localnet src 0.0.0.1-0.255.255.255
               acl localnet src 10.0.0.0/8
               acl localnet src 172.16.0.0/12
@@ -79,5 +79,5 @@ spec:
               EOF
               
               # Start Squid
-              echo "Starting Squid on port 8080..."
+              echo "Starting Squid on port 31234..."
               squid -f /etc/squid/squid.conf -NYC
