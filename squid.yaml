@@ -106,10 +106,30 @@ spec:
             - |
               # Initialize cache directories if they don't exist
               squid -z -f /etc/squid/squid.conf || true
-              # Start peer discovery in background
+              # Run peer discovery once to generate initial config
+              echo "Running initial peer discovery..."
+              SERVICE_DNS="squid-peers.proxy.svc.cluster.local"
+              HTTP_PORT="31234"
+              ICP_PORT="31235"
+              MYIP="${MY_POD_IP:-$(hostname -i | awk '{print $1}')}"
+              OUT_DIR="/tmp/squid-conf"
+              OUT_FILE="$OUT_DIR/99-peers.conf"
+              mkdir -p "$OUT_DIR"
+              # Generate initial peer config
+              ips="$(getent hosts "$SERVICE_DNS" | awk '{print $1}' | sort -u | grep -v -F "$MYIP")"
+              if [ -n "$ips" ]; then
+                {
+                  for ip in $ips; do
+                    printf 'cache_peer %s sibling %s %s proxy-only\n' "$ip" "$HTTP_PORT" "$ICP_PORT"
+                  done
+                } > "$OUT_FILE"
+                echo "Generated peer config:"
+                cat "$OUT_FILE"
+              else
+                echo "# No peers found" > "$OUT_FILE"
+              fi
+              # Start peer discovery in background for monitoring
               /bin/sh /opt/peer-discovery.sh &
-              # Wait a moment for peer discovery to run
-              sleep 2
               # Start Squid
               exec entrypoint.sh -f /etc/squid/squid.conf -NYC
       
