@@ -98,9 +98,9 @@ spec:
               name: squid-logs
             - mountPath: /tmp
               name: squid-tmp
-             - mountPath: /opt/peer-discovery.sh
-               name: entrypoint
-               subPath: peer-discovery.sh
+            - mountPath: /opt/peer-discovery.sh
+              name: entrypoint
+              subPath: peer-discovery.sh
 
           command:
             - /bin/sh
