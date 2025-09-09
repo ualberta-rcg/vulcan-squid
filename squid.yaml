@@ -17,6 +17,9 @@ spec:
       # Use host networking for stable IP addresses
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
+      # Ensure pods can bind to host ports
+      hostPID: false
+      hostIPC: false
       
       containers:
         - name: squid
@@ -152,6 +155,22 @@ spec:
       # Pod configuration
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
+      
+      # Tolerations for host networking and master nodes
+      tolerations:
+        - operator: Exists
+          effect: NoSchedule
+        - operator: Exists
+          effect: NoExecute
+        - operator: Exists
+          effect: NoSchedule
+          key: node-role.kubernetes.io/control-plane
+        - operator: Exists
+          effect: NoSchedule
+          key: node-role.kubernetes.io/master
+        - operator: Exists
+          effect: NoSchedule
+          key: node.kubernetes.io/unschedulable
       
       # Pod security context
       securityContext:
