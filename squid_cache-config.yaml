@@ -7,31 +7,58 @@ metadata:
   namespace: proxy
 data:
   cache.conf: |
-    # Cache storage configuration
-    cache_dir aufs /cache 100000 16 256
+    # Cache storage configuration for HPC cluster
+    cache_dir aufs /cache 500000 32 512    # 500GB cache, 32 dirs, 512 subdirs
     
-    # Memory cache - 32GB for high performance
-    cache_mem 32768 MB
+    # Memory cache - 16GB for high performance (adjust based on node memory)
+    cache_mem 16384 MB
     
-    # Object size limits
-    maximum_object_size 5120 MB
+    # Object size limits for large scientific datasets
+    maximum_object_size 10240 MB           # 10GB max for large files
     minimum_object_size 0 KB
     
     # Cache replacement policies - LFUDA for research workloads
     cache_replacement_policy heap LFUDA
     memory_replacement_policy heap LFUDA
     
-    # Performance tuning
-    workers 8                         # Adjust based on CPU cores
-    ipcache_size 4096                 # Larger IP cache
-    ipcache_low 90                    # Keep 90% on low memory
+    # Performance tuning for HPC workload
+    workers 16                        # More workers for high concurrency
+    ipcache_size 8192                 # Larger IP cache for many clients
+    ipcache_low 85                    # Keep 85% on low memory
     ipcache_high 95                   # Clear at 95%
     
-    # Advanced features
+    # Advanced features for HPC
     client_db on                      # Track client performance
     pipeline_prefetch on              # Prefetch pipelined requests
     collapsed_forwarding on           # Collapse identical requests
+    store_id_program /usr/lib/squid/storeid_file_rewrite
+    store_id_children 20 startup=10 idle=5 concurrency=0
     
-    # Refresh patterns for different content types
-    refresh_pattern ^/cvmfs/          0       5%      43200  # 30 days max freshness for CVMFS
-    refresh_pattern .                 0       10%     10080  # 7 days default for other content
+    # Connection limits for high concurrency
+    max_filedescriptors 65536
+    client_persistent_connections on
+    server_persistent_connections on
+    
+    # Refresh patterns for HPC and research content
+    refresh_pattern ^/cvmfs/          0       1%      2592000  # 30 days max freshness for CVMFS
+    refresh_pattern \.(rpm|deb|tar\.gz|tar\.bz2|zip)$ 0 0% 2592000  # 30 days for packages
+    refresh_pattern \.(iso|img)$      0       0%      2592000  # 30 days for disk images
+    refresh_pattern \.(dmg|pkg)$      0       0%      2592000  # 30 days for macOS packages
+    refresh_pattern \.(exe|msi)$      0       0%      2592000  # 30 days for Windows packages
+    refresh_pattern \.(whl|egg)$      0       0%      2592000  # 30 days for Python packages
+    refresh_pattern \.(jar|war)$      0       0%      2592000  # 30 days for Java packages
+    refresh_pattern \.(dll|so)$       0       0%      2592000  # 30 days for libraries
+    refresh_pattern \.(bin|run)$      0       0%      2592000  # 30 days for binaries
+    refresh_pattern \.(dat|data)$     0       0%      2592000  # 30 days for data files
+    refresh_pattern \.(json|xml|yaml|yml)$ 0 0% 2592000  # 30 days for config files
+    refresh_pattern \.(log|txt)$      0       0%      2592000  # 30 days for log files
+    refresh_pattern \.(pdf|doc|docx|ppt|pptx)$ 0 0% 2592000  # 30 days for documents
+    refresh_pattern \.(mp4|avi|mov|mkv)$ 0 0% 2592000  # 30 days for videos
+    refresh_pattern \.(mp3|wav|flac)$ 0 0% 2592000  # 30 days for audio
+    refresh_pattern \.(jpg|jpeg|png|gif|bmp|tiff)$ 0 0% 2592000  # 30 days for images
+    refresh_pattern \.(css|js|html|htm)$ 0 0% 2592000  # 30 days for web content
+    refresh_pattern \.(sql|db|sqlite)$ 0 0% 2592000  # 30 days for databases
+    refresh_pattern \.(h5|hdf5|nc|netcdf)$ 0 0% 2592000  # 30 days for scientific data
+    refresh_pattern \.(fits|fits.gz)$ 0 0% 2592000  # 30 days for astronomical data
+    refresh_pattern \.(vcf|bam|sam|fastq|fasta)$ 0 0% 2592000  # 30 days for genomic data
+    refresh_pattern .                 0       5%      604800   # 7 days default for other content

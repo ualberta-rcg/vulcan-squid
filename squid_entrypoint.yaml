@@ -51,11 +51,29 @@ data:
     # Deny all other access
     http_access deny all
     
-    # HTTP proxy port
+    # HTTP proxy port with high concurrency settings
+    http_port 3128 accel defaultsite=localhost vhost
     http_port 3128
     
     # Core dump directory
     coredump_dir /var/spool/squid
+    
+    # High concurrency settings for HPC cluster
+    max_filedescriptors 65536
+    client_persistent_connections on
+    server_persistent_connections on
+    persistent_request_timeout 60 seconds
+    client_lifetime 1 hour
+    server_lifetime 1 hour
+    
+    # Connection limits
+    client_db on
+    client_db_ttl 3600 seconds
+    
+    # Logging for monitoring
+    access_log /var/log/squid/access.log squid
+    cache_log /var/log/squid/cache.log
+    cache_store_log /var/log/squid/store.log
     
     # Refresh patterns for different content types
     refresh_pattern ^ftp:           1440    20%     10080

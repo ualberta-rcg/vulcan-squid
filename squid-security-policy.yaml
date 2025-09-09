@@ -1,0 +1,107 @@
+# Pod Security Policy for Squid Proxy
+# This policy enforces security constraints for the Squid DaemonSet
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: squid-psp
+  namespace: proxy
+spec:
+  # Allow host networking for stable IPs
+  hostNetwork: true
+  hostIPC: false
+  hostPID: false
+  
+  # Restrict host ports
+  hostPorts:
+    - min: 3128
+      max: 3128
+    - min: 3130
+      max: 3130
+  
+  # Security contexts
+  runAsUser:
+    rule: MustRunAsNonRoot
+    ranges:
+      - min: 3128
+        max: 3128
+  runAsGroup:
+    rule: MustRunAs
+    ranges:
+      - min: 3128
+        max: 3128
+  fsGroup:
+    rule: MustRunAs
+    ranges:
+      - min: 3128
+        max: 3128
+  
+  # Capabilities
+  allowedCapabilities:
+    - NET_BIND_SERVICE
+  requiredDropCapabilities:
+    - ALL
+  
+  # Volumes
+  allowedHostPaths:
+    - pathPrefix: "/var/lib/squid"
+      readOnly: false
+  volumes:
+    - configMap
+    - hostPath
+    - emptyDir
+  
+  # Security features
+  seLinux:
+    rule: RunAsAny
+  supplementalGroups:
+    rule: MustRunAs
+    ranges:
+      - min: 3128
+        max: 3128
+  readOnlyRootFilesystem: true
+  
+  # Privilege escalation
+  allowPrivilegeEscalation: false
+  defaultAllowPrivilegeEscalation: false
+  
+  # Privileged containers
+  privileged: false
+  defaultAddCapabilities: []
+  requiredDropCapabilities:
+    - ALL
+
+---
+# Network Policy for Squid
+# Restricts network access to only necessary ports
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: squid-netpol
+  namespace: proxy
+spec:
+  podSelector:
+    matchLabels:
+      app: squid
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - ports:
+        - protocol: TCP
+          port: 3128
+        - protocol: TCP
+          port: 3130
+      from:
+        - namespaceSelector: {}
+        - podSelector: {}
+  egress:
+    - ports:
+        - protocol: TCP
+          port: 80
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 3128
+        - protocol: TCP
+          port: 3130
+      to: []
