@@ -61,7 +61,7 @@ data:
     coredump_dir /var/spool/squid
     
     # PID file location
-    pid_filename /run/squid.pid
+    pid_filename /tmp/squid.pid
     
     # High concurrency settings for HPC cluster
     max_filedescriptors 65536
