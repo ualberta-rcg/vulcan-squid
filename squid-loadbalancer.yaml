@@ -91,7 +91,7 @@ spec:
       protocol: TCP
       targetPort: 3128
   selector:
-    workload.user.cattle.io/workloadselector: apps.deployment-proxy-squid
+    app: squid
   sessionAffinity: None
   type: LoadBalancer
 status:

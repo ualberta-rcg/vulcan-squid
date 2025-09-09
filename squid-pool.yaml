@@ -8,3 +8,4 @@ spec:
     - 172.26.92.11-172.26.92.11
   autoAssign: true
   avoidBuggyIPs: false
+  serviceAllocationStrategy: "random"

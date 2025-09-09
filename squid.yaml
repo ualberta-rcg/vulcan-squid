@@ -4,8 +4,16 @@ metadata:
   name: squid
   namespace: proxy
 spec:
+  selector:
+    matchLabels:
+      app: squid
   template:
+    metadata:
+      labels:
+        app: squid
     spec:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
       containers:
         - env:
             - name: NODE_NAME
@@ -51,7 +59,6 @@ spec:
             - mountPath: /etc/squid/squid.conf
               name: entrypoint
               subPath: squid.conf
-      dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
       securityContext: {}
