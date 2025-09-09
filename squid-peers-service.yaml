@@ -14,8 +14,8 @@ spec:
       protocol: TCP
       targetPort: 3128
     - name: icp
-      port: 31235
-      protocol: TCP
-      targetPort: 31235
+      port: 3130
+      protocol: UDP
+      targetPort: 3130
   selector:
     app: squid

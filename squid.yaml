@@ -108,8 +108,8 @@ spec:
               # Run peer discovery with retry logic
               echo "Running initial peer discovery..."
               SERVICE_DNS="squid-peers.squid-standard.svc.cluster.local"
-              HTTP_PORT="31234"
-              ICP_PORT="31235"
+              HTTP_PORT="3128"
+              ICP_PORT="3130"
               MYIP="${MY_POD_IP:-$(hostname -i | awk '{print $1}')}"
               OUT_DIR="/tmp/squid-conf"
               OUT_FILE="$OUT_DIR/99-peers.conf"

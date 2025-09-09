@@ -57,7 +57,7 @@ data:
     http_port 3128
 
     # ICP port for cache peer
-    icp_port 31235
+    icp_port 3130
     icp_access allow localnet
     icp_access deny all
     
@@ -98,7 +98,7 @@ data:
 
     SERVICE_DNS="${SERVICE_DNS:-squid-peers.squid-standard.svc.cluster.local}"
     HTTP_PORT="${HTTP_PORT:-3128}"
-    ICP_PORT="${ICP_PORT:-31235}"   # if using HTCP set 4827 and add " htcp" below
+    ICP_PORT="${ICP_PORT:-3130}"   # if using HTCP set 4827 and add " htcp" below
     INTERVAL="${INTERVAL:-15}"
     OUT_DIR="/tmp/squid-conf"
     OUT_FILE="$OUT_DIR/99-peers.conf"
