@@ -39,8 +39,9 @@ data:
     
     # Peer communication for cache clustering
     acl digest_request url_regex ^http://[^/]+/squid-internal-periodic/store_digest$
-    acl peer_ips src 10.42.0.0/16
-    http_access allow peer_ips digest_request
+    http_access allow localnet digest_request
+    acl netdb_request url_regex ^http://[^/]+/squid-internal-dynamic/netdb$
+    http_access allow localnet netdb_request
     
     # Allow localhost access
     http_access allow localhost
@@ -70,3 +71,57 @@ data:
     
     # Default refresh pattern
     refresh_pattern .               0       20%     4320
+  peer-discovery.sh: |
+    #!/bin/sh
+    set -eu
+
+    SERVICE_DNS="${SERVICE_DNS:-squid-peers.proxy.svc.cluster.local}"
+    HTTP_PORT="${HTTP_PORT:-3128}"
+    ICP_PORT="${ICP_PORT:-3130}"   # if using HTCP set 4827 and add " htcp" below
+    INTERVAL="${INTERVAL:-15}"
+    OUT_DIR="/etc/squid/conf.d"
+    OUT_FILE="$OUT_DIR/99-peers.conf"
+    TMP_FILE="$(mktemp)"
+    MYIP="${MY_POD_IP:-$(hostname -i | awk '{print $1}')}"
+
+    [ -f "$OUT_FILE" ] || : > "$OUT_FILE"
+
+    resolve_ips() {
+      # Prefer getent; fall back to nslookup/host/dig
+      if command -v getent >/dev/null 2>&1; then
+        getent hosts "$SERVICE_DNS" | awk '{print $1}'
+      elif command -v nslookup >/dev/null 2>&1; then
+        nslookup -type=A "$SERVICE_DNS" 2>/dev/null | awk '/^Address: /{print $2}'
+      elif command -v host >/dev/null 2>&1; then
+        host "$SERVICE_DNS" 2>/dev/null | awk '/ has address /{print $4}'
+      elif command -v dig >/dev/null 2>&1; then
+        dig +short A "$SERVICE_DNS"
+      else
+        echo "No DNS tool found" >&2
+        return 1
+      fi
+    }
+
+    render_file() {
+      ips="$(resolve_ips | sort -u | grep -v -F "$MYIP")"
+      {
+        for ip in $ips; do
+          printf 'cache_peer %s sibling %s %s proxy-only\n' "$ip" "$HTTP_PORT" "$ICP_PORT"
+        done
+      } > "$TMP_FILE"   # single redirection here, not inside the loop
+    }
+
+    # Initial render
+    render_file
+    mv "$TMP_FILE" "$OUT_FILE"
+
+    # Loop with change detection
+    while sleep "$INTERVAL"; do
+      TMP_FILE="$(mktemp)"
+      if render_file && { [ ! -f "$OUT_FILE" ] || ! cmp -s "$TMP_FILE" "$OUT_FILE"; }; then
+        mv "$TMP_FILE" "$OUT_FILE"
+        squid -k reconfigure || true
+      else
+        rm -f "$TMP_FILE"
+      fi
+    done

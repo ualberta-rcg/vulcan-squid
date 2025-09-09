@@ -20,7 +20,7 @@ spec:
       
       containers:
         - name: squid
-          image: ubuntu/squid:5.2-22.04_beta
+          image: ubuntu/squid:latest
           imagePullPolicy: Always
           
           # Environment variables for node identification
@@ -35,6 +35,8 @@ spec:
                 fieldRef:
                   apiVersion: v1
                   fieldPath: status.podIP
+            - name: SERVICE_DNS
+              value: squid-peers.proxy.svc.cluster.local
           
           # Ports exposed on host network
           ports:
@@ -68,6 +70,16 @@ spec:
             - mountPath: /etc/squid/squid.conf
               name: entrypoint
               subPath: squid.conf
+            - mountpath: /opt/peer-discovery.sh
+              name: entrypoint
+              subPath: peer-discovery.sh
+
+          command:
+            - /bin/sh
+            - '-c'
+            - |
+              /bin/sh /opt/peer-discovery.sh &
+              exec entrypoint.sh -f /etc/squid/squid.conf -NYC
       
       # Pod configuration
       restartPolicy: Always
