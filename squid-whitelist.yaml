@@ -119,3 +119,11 @@ data:
     .nih.gov
     .gc.ca
     .youtube.com
+    
+    # Testing and Development
+    .httpbin.org
+    .httpbin.io
+    .jsonplaceholder.typicode.com
+    .postman-echo.com
+    .reqres.in
+    .httpstat.us
