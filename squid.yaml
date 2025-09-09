@@ -41,14 +41,6 @@ spec:
             - name: SERVICE_DNS
               value: squid-peers.squid-standard.svc.cluster.local
           
-          # Ports exposed on host network (containerPort only for hostNetwork)
-          ports:
-            - containerPort: 31234
-              name: http-proxy
-              protocol: TCP
-            - containerPort: 31235
-              name: icp
-              protocol: TCP
           
           # Security context - hardened for production
           securityContext:
