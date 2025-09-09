@@ -10,12 +10,12 @@ spec:
   clusterIP: None  # Headless service for peer discovery
   ports:
     - name: http-proxy
-      port: 3128
+      port: 31234
       protocol: TCP
-      targetPort: 3128
+      targetPort: 31234
     - name: icp
-      port: 3130
+      port: 31235
       protocol: TCP
-      targetPort: 3130
+      targetPort: 31235
   selector:
     app: squid

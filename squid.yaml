@@ -40,10 +40,10 @@ spec:
           
           # Ports exposed on host network
           ports:
-            - containerPort: 3128
+            - containerPort: 31234
               name: http-proxy
               protocol: TCP
-            - containerPort: 3130
+            - containerPort: 31235
               name: icp
               protocol: TCP
           
