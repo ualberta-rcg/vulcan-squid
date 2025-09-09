@@ -12,7 +12,7 @@ metadata:
     management.cattle.io/ui-managed: 'true'
 spec:
   type: LoadBalancer
-  loadBalancerIP: 192.168.1.31  # Available IP in your subnet
+  loadBalancerIP: 192.168.1.40  # Available IP in your subnet
   ports:
     - name: http-proxy
       port: 31234
