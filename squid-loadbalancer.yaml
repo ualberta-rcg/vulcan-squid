@@ -1,16 +1,18 @@
-# Squid ClusterIP Service - For internal cluster access only
-# With host networking, direct access is via node IPs (e.g., http://node-ip:3128)
+# Squid LoadBalancer - MetalLB LoadBalancer for Squid Proxy
+# This provides a single entry point while maintaining host networking benefits
 apiVersion: v1
 kind: Service
 metadata:
-  name: squid
+  name: squid-lb
   namespace: squid-standard
   annotations:
+    metallb.universe.tf/allow-shared-ip: squid-lb
     # Rancher management annotations
     field.cattle.io/targetWorkloadIds: '["squid-standard/squid"]'
     management.cattle.io/ui-managed: 'true'
 spec:
-  type: ClusterIP
+  type: LoadBalancer
+  loadBalancerIP: 192.168.1.31  # Available IP in your subnet
   ports:
     - name: http-proxy
       port: 31234

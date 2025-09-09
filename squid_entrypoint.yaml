@@ -4,7 +4,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: entrypoint
-  namespace: proxy
+  namespace: squid-standard
 data:
   squid.conf: |
     # Network Access Control Lists (ACLs)

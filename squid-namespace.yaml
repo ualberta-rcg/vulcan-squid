@@ -1,0 +1,9 @@
+# Squid Standard Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: squid-standard
+  labels:
+    name: squid-standard
+    app: squid
+    purpose: proxy-cache

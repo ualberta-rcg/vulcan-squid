@@ -1,0 +1,23 @@
+# MetalLB IP Pool Configuration for Squid LoadBalancer
+# This reserves IP addresses for the Squid LoadBalancer services
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: squid-pool
+  namespace: metallb-system
+spec:
+  addresses:
+    - 192.168.1.31-192.168.1.31  # Reserve IPs for Squid LoadBalancer
+  autoAssign: false
+
+---
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: squid-l2
+  namespace: metallb-system
+spec:
+  ipAddressPools:
+    - squid-pool
+  interfaces:
+    - 192.168.1.0/24  # Your subnet

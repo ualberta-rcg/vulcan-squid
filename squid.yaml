@@ -4,7 +4,7 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: squid
-  namespace: proxy
+  namespace: squid-standard
 spec:
   selector:
     matchLabels:
