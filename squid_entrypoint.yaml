@@ -70,10 +70,10 @@ data:
     persistent_request_timeout 60 seconds
     client_lifetime 1 hour
     
-    # Logging for monitoring
-    access_log /var/log/squid/access.log squid
-    cache_log /var/log/squid/cache.log
-    cache_store_log /var/log/squid/store.log
+    # Logging to stdout/stderr for container logging
+    access_log stdio:/dev/stdout squid
+    cache_log stdio:/dev/stderr
+    cache_store_log stdio:/dev/stderr
     
     # Refresh patterns for different content types
     refresh_pattern ^ftp:           1440    20%     10080

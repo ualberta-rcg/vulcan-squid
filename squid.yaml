@@ -94,8 +94,6 @@ spec:
               readOnly: true
             - mountPath: /var/spool/squid
               name: squid-spool
-            - mountPath: /var/log/squid
-              name: squid-logs
             - mountPath: /tmp
               name: squid-tmp
             - mountPath: /run
@@ -145,10 +143,6 @@ spec:
         - name: squid-spool
           hostPath:
             path: /var/lib/squid/spool
-            type: DirectoryOrCreate
-        - name: squid-logs
-          hostPath:
-            path: /var/lib/squid/logs
             type: DirectoryOrCreate
         - name: squid-tmp
           emptyDir:
