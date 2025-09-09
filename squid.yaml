@@ -104,9 +104,12 @@ spec:
             - /bin/sh
             - '-c'
             - |
-              # Debug mode - just sleep so we can bash in
-              echo "Debug mode: sleeping for debugging..."
-              sleep infinity
+              # Initialize cache directories if they don't exist
+              squid -z -f /etc/squid/squid.conf || true
+              # Start peer discovery in background
+              /bin/sh /opt/peer-discovery.sh &
+              # Start Squid
+              exec entrypoint.sh -f /etc/squid/squid.conf -NYC
       
       # Pod configuration
       restartPolicy: Always
