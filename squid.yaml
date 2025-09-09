@@ -108,6 +108,8 @@ spec:
               squid -z -f /etc/squid/squid.conf || true
               # Start peer discovery in background
               /bin/sh /opt/peer-discovery.sh &
+              # Wait a moment for peer discovery to run
+              sleep 2
               # Start Squid
               exec entrypoint.sh -f /etc/squid/squid.conf -NYC
       

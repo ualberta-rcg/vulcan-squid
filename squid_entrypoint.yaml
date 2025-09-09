@@ -121,23 +121,34 @@ data:
 
     render_file() {
       ips="$(resolve_ips | sort -u | grep -v -F "$MYIP")"
-      {
-        for ip in $ips; do
-          printf 'cache_peer %s sibling %s %s proxy-only\n' "$ip" "$HTTP_PORT" "$ICP_PORT"
-        done
-      } > "$TMP_FILE"   # single redirection here, not inside the loop
+      if [ -n "$ips" ]; then
+        {
+          for ip in $ips; do
+            printf 'cache_peer %s sibling %s %s proxy-only\n' "$ip" "$HTTP_PORT" "$ICP_PORT"
+          done
+        } > "$TMP_FILE"   # single redirection here, not inside the loop
+      else
+        echo "# No peers found" > "$TMP_FILE"
+      fi
     }
 
     # Initial render
+    echo "Starting peer discovery for $SERVICE_DNS"
+    echo "My IP: $MYIP"
     render_file
     mv "$TMP_FILE" "$OUT_FILE"
+    echo "Generated peer config:"
+    cat "$OUT_FILE"
 
     # Loop with change detection
     while sleep "$INTERVAL"; do
       TMP_FILE="$(mktemp)"
       if render_file && { [ ! -f "$OUT_FILE" ] || ! cmp -s "$TMP_FILE" "$OUT_FILE"; }; then
         mv "$TMP_FILE" "$OUT_FILE"
-        squid -k reconfigure || true
+        # Only try to reconfigure if Squid is running
+        if pgrep squid >/dev/null 2>&1; then
+          squid -k reconfigure || true
+        fi
       else
         rm -f "$TMP_FILE"
       fi
