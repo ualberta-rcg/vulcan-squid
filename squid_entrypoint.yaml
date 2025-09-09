@@ -55,6 +55,11 @@ data:
     
     # HTTP proxy port with high concurrency settings
     http_port 31234
+
+    # ICP port for cache peer
+    icp_port 31235
+    icp_access allow localnet
+    icp_access deny all
     
     # Core dump directory
     coredump_dir /var/spool/squid
