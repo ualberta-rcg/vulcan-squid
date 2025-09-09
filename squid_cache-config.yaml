@@ -29,7 +29,7 @@ data:
     
     # Advanced features
     client_db on                      # Track client performance
-    pipeline_prefetch on              # Prefetch pipelined requests
+    pipeline_prefetch 2               # Prefetch pipelined requests
     collapsed_forwarding on           # Collapse identical requests
     
     # Refresh patterns for different content types
