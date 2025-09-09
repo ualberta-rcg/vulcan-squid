@@ -1,3 +1,5 @@
+# MetalLB IP Address Pool - Defines available IP addresses for LoadBalancer services
+# This pool provides the external IP for the Squid LoadBalancer service
 apiVersion: metallb.io/v1beta1
 kind: IPAddressPool
 metadata:
@@ -5,7 +7,7 @@ metadata:
   namespace: metallb-system
 spec:
   addresses:
-    - 172.26.92.11-172.26.92.11
+    - 172.26.92.11-172.26.92.11  # Single IP for Squid LoadBalancer
   autoAssign: true
   avoidBuggyIPs: false
   serviceAllocationStrategy: "random"

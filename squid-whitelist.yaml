@@ -1,101 +1,122 @@
+# Squid Whitelist Configuration - Domain-based access control for research environments
+# This ConfigMap contains whitelisted domains and network access rules for research computing
 apiVersion: v1
-data:
-  whitelist.conf: |
-    acl purge method PURGE
-    http_access allow localhost purge
-    http_access deny purge
-    acl vulcan_net dst 172.26.226.0/23 172.26.92.0/23
-    acl whitelist dstdomain "/etc/squid/whitelist.txt"
-    http_access allow localnet manager
-    http_access allow vulcan_net
-    http_access allow whitelist
-    http_access deny all
-  whitelist.txt: |
-    .amii.ca
-    .ualberta.ca
-    .computecanada.ca
-    .computecanada.net
-    .rl.ac.uk
-    .cern.ch
-    .comet.ml
-    .comet-ml.com
-    .comet.com
-    .wandb.com
-    .pypi.python.org
-    .files.pythonhosted.org
-    .pypi.org
-    .github.com
-    .tower.nf
-    .mcgill.ca
-    .edicogenome.com
-    .license.theobjects.com
-    .muug.ca
-    .mirror.its.dal.ca
-    .utstat.toronto.edu
-    .cran.pacha.dev
-    .rstudio.com
-    .calculquebec.ca
-    .get.cryosparc.com
-    .multimedialabsfu.xyz
-    .api.cryptlex.com
-    .githubusercontent.com
-    .www.pgscatalog.org
-    .api.lab.hectiq.ai
-    .nanuq.bioinfo.uqam.ca
-    .ghcr.io
-    .ghcr1production.blob.core.windows.net
-    .pkg-containers.githubusercontent.com
-    .quay.io
-    .crocodile-gqhfy6c73a-uc.a.run.app
-    .api.colabfold.com
-    .slac.stanford.edu
-    .ws-cadc.canfar.net
-    .ws-uv.canfar.net
-    .ws-sf.canfar.net
-    .www.canfar.net
-    .datasets.cloud.pennylane.ai
-    .opensciencegrid.org
-    .ubuntu.com
-    .duosecurity.com
-    .zabbix.com
-    .nvidia.com
-    .huggingface.co
-    .api.openai.com
-    .artifacts.elastic.co
-    .hf.co
-    .googleapis.com
-    .kaggle.com
-    .1e100.net
-    .snapcraft.io
-    .snapcraftcontent.com
-    .amazon.com
-    .amazonaws.com
-    .google.com
-    .nih.gov
-    .gc.ca
-    .docker.io
-    .docker.com
-    .ucsc.edu
-    .sfu.ca
-    .ubc.ca
-    .githubusercontent.com
-    .github.io
-    .githubassets.com
-    .githubusercontent.com
-    .googleapis.com
-    .githubassets.com
-    .rust-lang.org
-    .rustup.rs
-    .crates.io
-    .wandb.ai
-    .wandbusercontent.com
-    .neptune.ai
-    .gitlab.com
-    .vllm.ai
-    .youtube.com
-    .gstatic.com
-    .golang.org
 kind: ConfigMap
 metadata:
   name: squid-whitelist
   namespace: proxy
+data:
+  whitelist.conf: |
+    # Cache management ACLs
+    acl purge method PURGE
+    http_access allow localhost purge
+    http_access deny purge
+    
+    # Network-based access control
+    acl vulcan_net dst 172.26.226.0/23 172.26.92.0/23
+    acl whitelist dstdomain "/etc/squid/whitelist.txt"
+    
+    # Access rules
+    http_access allow localnet manager
+    http_access allow vulcan_net
+    http_access allow whitelist
+    http_access deny all
+  
+  whitelist.txt: |
+    # Academic and Research Institutions
+    .amii.ca
+    .ualberta.ca
+    .mcgill.ca
+    .sfu.ca
+    .ubc.ca
+    .ucsc.edu
+    .utstat.toronto.edu
+    .nanuq.bioinfo.uqam.ca
+    
+    # Research Computing Centers
+    .computecanada.ca
+    .computecanada.net
+    .calculquebec.ca
+    .opensciencegrid.org
+    .rl.ac.uk
+    .cern.ch
+    .slac.stanford.edu
+    
+    # Scientific Data Repositories
+    .ws-cadc.canfar.net
+    .ws-uv.canfar.net
+    .ws-sf.canfar.net
+    .www.canfar.net
+    .www.pgscatalog.org
+    .datasets.cloud.pennylane.ai
+    
+    # Machine Learning and AI Platforms
+    .comet.ml
+    .comet-ml.com
+    .comet.com
+    .wandb.com
+    .wandb.ai
+    .wandbusercontent.com
+    .neptune.ai
+    .huggingface.co
+    .hf.co
+    .api.openai.com
+    .api.lab.hectiq.ai
+    .vllm.ai
+    
+    # Package Repositories and Development Tools
+    .pypi.python.org
+    .files.pythonhosted.org
+    .pypi.org
+    .github.com
+    .githubusercontent.com
+    .github.io
+    .githubassets.com
+    .ghcr.io
+    .ghcr1production.blob.core.windows.net
+    .pkg-containers.githubusercontent.com
+    .gitlab.com
+    .rust-lang.org
+    .rustup.rs
+    .crates.io
+    .golang.org
+    
+    # Container Registries
+    .docker.io
+    .docker.com
+    .quay.io
+    
+    # Cloud Providers and Services
+    .amazon.com
+    .amazonaws.com
+    .google.com
+    .googleapis.com
+    .1e100.net
+    .gstatic.com
+    .kaggle.com
+    
+    # Software and Tools
+    .tower.nf
+    .rstudio.com
+    .get.cryosparc.com
+    .api.colabfold.com
+    .crocodile-gqhfy6c73a-uc.a.run.app
+    .multimedialabsfu.xyz
+    .api.cryptlex.com
+    .edicogenome.com
+    .license.theobjects.com
+    .muug.ca
+    .mirror.its.dal.ca
+    .cran.pacha.dev
+    .nvidia.com
+    .artifacts.elastic.co
+    
+    # System and Infrastructure
+    .ubuntu.com
+    .snapcraft.io
+    .snapcraftcontent.com
+    .duosecurity.com
+    .zabbix.com
+    .nih.gov
+    .gc.ca
+    .youtube.com

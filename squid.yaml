@@ -1,3 +1,5 @@
+# Squid Proxy DaemonSet - Deploys one Squid instance per node using host networking
+# This provides stable IP addresses for CVMFS and other services that need consistent endpoints
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -12,10 +14,17 @@ spec:
       labels:
         app: squid
     spec:
+      # Use host networking for stable IP addresses
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
+      
       containers:
-        - env:
+        - name: squid
+          image: ubuntu/squid:5.2-22.04_beta
+          imagePullPolicy: Always
+          
+          # Environment variables for node identification
+          env:
             - name: NODE_NAME
               valueFrom:
                 fieldRef:
@@ -26,24 +35,24 @@ spec:
                 fieldRef:
                   apiVersion: v1
                   fieldPath: status.podIP
-          image: ubuntu/squid:5.2-22.04_beta
-          imagePullPolicy: Always
-          name: squid
+          
+          # Ports exposed on host network
           ports:
             - containerPort: 3128
-              name: squid
+              name: http-proxy
               protocol: TCP
             - containerPort: 3130
               name: icp
               protocol: TCP
-          resources: {}
+          
+          # Security context - non-privileged but needs write access for cache
           securityContext:
             allowPrivilegeEscalation: false
             privileged: false
             readOnlyRootFilesystem: false
             runAsNonRoot: false
-          terminationMessagePath: /dev/termination-log
-          terminationMessagePolicy: File
+          
+          # Volume mounts for configuration and cache
           volumeMounts:
             - mountPath: /etc/squid/whitelist.txt
               name: squid-whitelist
@@ -59,31 +68,33 @@ spec:
             - mountPath: /etc/squid/squid.conf
               name: entrypoint
               subPath: squid.conf
+      
+      # Pod configuration
       restartPolicy: Always
-      schedulerName: default-scheduler
-      securityContext: {}
       terminationGracePeriodSeconds: 30
+      
+      # Volumes for configuration and persistent cache
       volumes:
-        - configMap:
-            defaultMode: 420
+        - name: squid-whitelist
+          configMap:
             name: squid-whitelist
-            optional: false
-          name: squid-whitelist
-        - configMap:
             defaultMode: 420
+        - name: cache-config
+          configMap:
             name: cache-config
-            optional: false
-          name: cache-config
-        - hostPath:
+            defaultMode: 420
+        - name: cache-dir
+          hostPath:
             path: /var/lib/squid
-            type: ''
-          name: cache-dir
-        - configMap:
-            defaultMode: 493
+            type: DirectoryOrCreate
+        - name: entrypoint
+          configMap:
             name: entrypoint
-          name: entrypoint
+            defaultMode: 493
+  
+  # Rolling update strategy for zero-downtime updates
   updateStrategy:
+    type: RollingUpdate
     rollingUpdate:
       maxSurge: 0
       maxUnavailable: 1
-    type: RollingUpdate

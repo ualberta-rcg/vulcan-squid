@@ -1,48 +1,12 @@
+# Squid Peers Service - Enables peer-to-peer cache communication between Squid instances
+# This service allows Squid instances to share cache data and coordinate requests
 apiVersion: v1
 kind: Service
 metadata:
-  creationTimestamp: '2025-08-07T02:06:16Z'
-  managedFields:
-    - apiVersion: v1
-      fieldsType: FieldsV1
-      fieldsV1:
-        f:spec:
-          f:clusterIP: {}
-          f:internalTrafficPolicy: {}
-          f:ipFamilies: {}
-          f:ipFamilyPolicy: {}
-          f:ports:
-            .: {}
-            k:{"port":3128,"protocol":"TCP"}:
-              .: {}
-              f:name: {}
-              f:port: {}
-              f:protocol: {}
-              f:targetPort: {}
-            k:{"port":3130,"protocol":"TCP"}:
-              .: {}
-              f:name: {}
-              f:port: {}
-              f:protocol: {}
-              f:targetPort: {}
-          f:selector: {}
-          f:sessionAffinity: {}
-          f:type: {}
-      manager: rancher
-      operation: Update
-      time: '2025-08-07T02:10:18Z'
   name: squid-peers
   namespace: proxy
-  resourceVersion: '65874776'
-  uid: 3fe292ea-537e-4372-91a0-0fde0238eb7a
 spec:
-  clusterIP: None
-  clusterIPs:
-    - None
-  internalTrafficPolicy: Cluster
-  ipFamilies:
-    - IPv4
-  ipFamilyPolicy: SingleStack
+  type: NodePort
   ports:
     - name: http-proxy
       port: 3128
@@ -57,6 +21,3 @@ spec:
   selector:
     app: squid
   sessionAffinity: None
-  type: NodePort
-status:
-  loadBalancer: {}

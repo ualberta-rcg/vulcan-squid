@@ -1,56 +1,22 @@
+# Squid NodePort Service - Provides stable access to Squid instances on host network
+# This service allows direct access to Squid via node IPs for CVMFS and other services
 apiVersion: v1
 kind: Service
 metadata:
-  annotations:
-    field.cattle.io/targetWorkloadIds: '["proxy/squid"]'
-    management.cattle.io/ui-managed: 'true'
-  creationTimestamp: '2025-03-26T02:54:51Z'
-  managedFields:
-    - apiVersion: v1
-      fieldsType: FieldsV1
-      fieldsV1:
-        f:metadata:
-          f:annotations:
-            .: {}
-            f:field.cattle.io/targetWorkloadIds: {}
-            f:management.cattle.io/ui-managed: {}
-        f:spec:
-          f:internalTrafficPolicy: {}
-          f:ports:
-            .: {}
-            k:{"port":3128,"protocol":"TCP"}:
-              .: {}
-              f:name: {}
-              f:port: {}
-              f:protocol: {}
-              f:targetPort: {}
-          f:selector: {}
-          f:sessionAffinity: {}
-          f:type: {}
-      manager: rancher
-      operation: Update
-      time: '2025-03-27T14:14:55Z'
   name: squid
   namespace: proxy
-  resourceVersion: '963930'
-  uid: b8cfeb53-9c8e-4250-8cca-3ee183614c42
+  annotations:
+    # Rancher management annotations
+    field.cattle.io/targetWorkloadIds: '["proxy/squid"]'
+    management.cattle.io/ui-managed: 'true'
 spec:
-  clusterIP: 10.43.243.125
-  clusterIPs:
-    - 10.43.243.125
-  internalTrafficPolicy: Cluster
-  ipFamilies:
-    - IPv4
-  ipFamilyPolicy: SingleStack
+  type: NodePort
   ports:
-    - name: squid
+    - name: http-proxy
       port: 3128
       protocol: TCP
       targetPort: 3128
-      nodePort: 3128
+      nodePort: 3128  # Same as container port for simplicity
   selector:
     app: squid
   sessionAffinity: None
-  type: NodePort
-status:
-  loadBalancer: {}
