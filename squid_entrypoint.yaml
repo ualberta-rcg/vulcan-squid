@@ -66,11 +66,6 @@ data:
     server_persistent_connections on
     persistent_request_timeout 60 seconds
     client_lifetime 1 hour
-    server_lifetime 1 hour
-    
-    # Connection limits
-    client_db on
-    client_db_ttl 3600 seconds
     
     # Logging for monitoring
     access_log /var/log/squid/access.log squid
