@@ -25,5 +25,5 @@ spec:
   selector:
     app: squid
   sessionAffinity: None
-  externalTrafficPolicy: Cluster
-  internalTrafficPolicy: Cluster
+  externalTrafficPolicy: Local
+  internalTrafficPolicy: Local
