@@ -44,7 +44,7 @@ spec:
           
           # Security context - hardened for production
           securityContext:
-            allowPrivilegeEscalation: false
+            allowPrivilegeEscalation: true  # Required for SYS_RESOURCE capability
             privileged: false
             readOnlyRootFilesystem: true
             runAsNonRoot: true
@@ -55,6 +55,7 @@ spec:
                 - ALL
               add:
                 - NET_BIND_SERVICE  # Required for binding to privileged ports
+                - SYS_RESOURCE      # Required for increasing file descriptor limits
             seccompProfile:
               type: RuntimeDefault
           
@@ -63,9 +64,11 @@ spec:
             requests:
               memory: "8Gi"      # 8GB minimum for CVMFS caching
               cpu: "1000m"       # 1 CPU core minimum
+              ephemeral-storage: "10Gi"  # Cache storage minimum
             limits:
               memory: "32Gi"     # 32GB maximum (adjust based on node memory)
               cpu: "4000m"       # 4 CPU cores maximum
+              ephemeral-storage: "500Gi" # Cache storage maximum
           
           # Volume mounts for configuration and cache
           volumeMounts:
@@ -95,6 +98,28 @@ spec:
               name: entrypoint
               subPath: peer-discovery.sh
 
+          # Health checks for better monitoring
+          livenessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - "squid -k check -f /etc/squid/squid.conf"
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - "curl -f http://localhost:3128/squid-internal-mgr/info || exit 1"
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          
           command:
             - /bin/sh
             - '-c'

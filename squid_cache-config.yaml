@@ -22,20 +22,37 @@ data:
     memory_replacement_policy heap LFUDA
     
     # Performance tuning for HPC workload
-    workers 16                        # More workers for high concurrency
+    workers 4                         # Reduced workers for stability (was 16)
     ipcache_size 8192                 # Larger IP cache for many clients
     ipcache_low 85                    # Keep 85% on low memory
     ipcache_high 95                   # Clear at 95%
     
+    # DNS configuration for reliable resolution
+    dns_nameservers 8.8.8.8 1.1.1.1
+    dns_v4_first on
+    
     # Advanced features for HPC
     client_db on                      # Track client performance
-    pipeline_prefetch 2               # Prefetch pipelined requests
-    collapsed_forwarding on           # Collapse identical requests
+    pipeline_prefetch 1               # Reduced prefetch for stability (was 2)
+    collapsed_forwarding off          # Disabled to prevent large file serialization
     
     # Connection limits for high concurrency
     max_filedescriptors 65536
     client_persistent_connections on
     server_persistent_connections on
+    
+    # Monitoring and debugging
+    debug_options ALL,1
+    logformat squid %ts.%03tu %6tr %>a %Ss/%03>Hs %<st %rm %ru %[un %Sh/%<a %mt
+    access_log stdio:/dev/stdout squid
+    cache_log stdio:/dev/stderr
+    cache_store_log stdio:/dev/stderr
+    
+    # Timeout settings to prevent hangs
+    connect_timeout 30 seconds
+    request_timeout 60 seconds
+    client_lifetime 1 hour
+    server_idle_pconn_timeout 60 seconds
     
     # Refresh patterns for HPC and research content (max 1 year = 31536000 seconds)
     refresh_pattern ^/cvmfs/          0       1%      31536000  # 1 year max freshness for CVMFS
