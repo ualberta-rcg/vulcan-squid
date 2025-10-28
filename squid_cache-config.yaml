@@ -1,79 +1,107 @@
-# Squid Cache Configuration - High-performance caching settings for research workloads
-# This ConfigMap contains optimized cache settings for CVMFS and research data
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: cache-config
-  namespace: squid-standard
-data:
-  cache.conf: |
-    # Cache storage configuration for HPC cluster
-    cache_dir aufs /var/lib/squid 500000 32 512    # 500GB cache, 32 dirs, 512 subdirs
-    
-    # Memory cache - 16GB for high performance (adjust based on node memory)
-    cache_mem 16384 MB
-    
-    # Object size limits for large scientific datasets
-    maximum_object_size 10240 MB           # 10GB max for large files
-    minimum_object_size 0 KB
-    
-    # Cache replacement policies - LFUDA for research workloads
-    cache_replacement_policy heap LFUDA
-    memory_replacement_policy heap LFUDA
-    
-    # Performance tuning for HPC workload
-    workers 4                         # Reduced workers for stability (was 16)
-    ipcache_size 8192                 # Larger IP cache for many clients
-    ipcache_low 85                    # Keep 85% on low memory
-    ipcache_high 95                   # Clear at 95%
-    
-    # DNS configuration for reliable resolution
-    dns_nameservers 8.8.8.8 1.1.1.1
-    dns_v4_first on
-    
-    # Advanced features for HPC
-    client_db on                      # Track client performance
-    pipeline_prefetch 1               # Reduced prefetch for stability (was 2)
-    collapsed_forwarding off          # Disabled to prevent large file serialization
-    
-    # Connection limits for high concurrency
-    max_filedescriptors 65536
-    client_persistent_connections on
-    server_persistent_connections on
-    
-    # Monitoring and debugging
-    debug_options ALL,1
-    logformat squid %ts.%03tu %6tr %>a %Ss/%03>Hs %<st %rm %ru %[un %Sh/%<a %mt
-    access_log stdio:/dev/stdout squid
-    cache_log stdio:/dev/stderr
-    cache_store_log stdio:/dev/stderr
-    
-    # Timeout settings to prevent hangs
-    connect_timeout 30 seconds
-    request_timeout 60 seconds
-    client_lifetime 1 hour
-    server_idle_pconn_timeout 60 seconds
-    
-    # Refresh patterns for HPC and research content (max 1 year = 31536000 seconds)
-    refresh_pattern ^/cvmfs/          0       1%      31536000  # 1 year max freshness for CVMFS
-    refresh_pattern \.(rpm|deb|tar\.gz|tar\.bz2|zip)$ 0 0% 31536000  # 1 year for packages
-    refresh_pattern \.(iso|img)$      0       0%      31536000  # 1 year for disk images
-    refresh_pattern \.(dmg|pkg)$      0       0%      31536000  # 1 year for macOS packages
-    refresh_pattern \.(exe|msi)$      0       0%      31536000  # 1 year for Windows packages
-    refresh_pattern \.(whl|egg)$      0       0%      31536000  # 1 year for Python packages
-    refresh_pattern \.(jar|war)$      0       0%      31536000  # 1 year for Java packages
-    refresh_pattern \.(dll|so)$       0       0%      31536000  # 1 year for libraries
-    refresh_pattern \.(bin|run)$      0       0%      31536000  # 1 year for binaries
-    refresh_pattern \.(dat|data)$     0       0%      31536000  # 1 year for data files
-    refresh_pattern \.(json|xml|yaml|yml)$ 0 0% 31536000  # 1 year for config files
-    refresh_pattern \.(log|txt)$      0       0%      31536000  # 1 year for log files
-    refresh_pattern \.(pdf|doc|docx|ppt|pptx)$ 0 0% 31536000  # 1 year for documents
-    refresh_pattern \.(mp4|avi|mov|mkv)$ 0 0% 31536000  # 1 year for videos
-    refresh_pattern \.(mp3|wav|flac)$ 0 0% 31536000  # 1 year for audio
-    refresh_pattern \.(jpg|jpeg|png|gif|bmp|tiff)$ 0 0% 31536000  # 1 year for images
-    refresh_pattern \.(css|js|html|htm)$ 0 0% 31536000  # 1 year for web content
-    refresh_pattern \.(sql|db|sqlite)$ 0 0% 31536000  # 1 year for databases
-    refresh_pattern \.(h5|hdf5|nc|netcdf)$ 0 0% 31536000  # 1 year for scientific data
-    refresh_pattern \.(fits|fits.gz)$ 0 0% 31536000  # 1 year for astronomical data
-    refresh_pattern \.(vcf|bam|sam|fastq|fasta)$ 0 0% 31536000  # 1 year for genomic data
-    refresh_pattern .                 0       5%      604800   # 7 days default for other content
+# ============================================
+# === STORAGE & SIZES ========================
+# ============================================
+
+cache_dir aufs /var/lib/squid 100000 32 512     # 100 GB per node/pod (matches LV size)
+cache_mem 24576 MB                              # 24 GB RAM cache for hot objects and metadata
+maximum_object_size 20480 MB
+maximum_object_size_in_memory 512 KB
+
+
+# ============================================
+# === POLICIES ===============================
+# ============================================
+
+cache_replacement_policy heap LFUDA
+memory_replacement_policy heap GDSF
+
+
+# ============================================
+# === CONCURRENCY / STABILITY ================
+# ============================================
+
+workers 4
+max_filedescriptors 65536
+
+client_persistent_connections on
+server_persistent_connections on
+
+
+# ============================================
+# === DNS ====================================
+# ============================================
+
+dns_nameservers 129.128.5.233 8.8.8.8 1.1.1.1
+
+
+# ============================================
+# === PERFORMANCE FEATURES ==================
+# ============================================
+
+client_db on
+pipeline_prefetch 1
+collapsed_forwarding on                # consolidate identical requests
+read_ahead_gap 16 KB
+quick_abort_min 0 KB
+quick_abort_max 0 KB
+store_dir_select_algorithm least-load   # balances disk I/O across dirs if scaled
+
+
+# ============================================
+# === REFRESH PATTERNS (CVMFS & HPC) ========
+# ============================================
+
+# CVMFS objects: prefer revalidation without refetch
+refresh_pattern -i ^/cvmfs/.*      1440 90% 43200 reload-into-ims ignore-reload
+
+# Common software/data artifacts
+refresh_pattern \.(rpm|deb|tar|gz|bz2|xz|zip|iso|img|whl|egg|dll|so|bin|run)$ 1440 90% 43200 reload-into-ims
+refresh_pattern \.(dat|data|json|xml|yaml|yml)$ 1440 90% 43200 reload-into-ims
+refresh_pattern \.(h5|hdf5|nc|netcdf|fits|fits.gz)$ 1440 90% 43200 reload-into-ims
+refresh_pattern \.(vcf|bam|sam|fastq|fasta)$ 1440 90% 43200 reload-into-ims
+refresh_pattern \.(pdf|doc|docx|ppt|pptx)$ 1440 90% 43200 reload-into-ims
+refresh_pattern \.(jpg|jpeg|png|gif|bmp|tiff|css|js|html|htm)$ 1440 90% 43200 reload-into-ims
+refresh_pattern -i ^/cvmfs/.* 1440 90% 43200
+refresh_pattern . 0 20% 4320 reload-into-ims    # default heuristic freshness (up to 3 days)
+
+
+
+# ============================================
+# === LOGGING (stdout/stderr for K8s) ========
+# ============================================
+
+logformat basic %ts.%03tu %6tr %>a %Ss/%03>Hs %<st %rm %ru %un %Sh/%<a %mt
+access_log stdio:/dev/stdout basic
+cache_log stdio:/dev/stderr
+cache_store_log stdio:/dev/stderr
+
+
+# ============================================
+# === TIMEOUTS (stable but responsive) =======
+# ============================================
+
+connect_timeout 30 seconds
+request_timeout 90 seconds
+read_timeout 15 minutes
+client_lifetime 1 hour
+server_idle_pconn_timeout 120 seconds
+shutdown_lifetime 5 seconds
+
+
+# ============================================
+# === MISC RECOMMENDATIONS ===================
+# ============================================
+
+# Disable ICP and HTCP (not used in this setup)
+icp_port 0
+htcp_port 0
+
+# Optional safety limits for crashes or high I/O
+maximum_icp_query_timeout 2 seconds
+
+# Coredumps disabled for containers
+coredump_dir /var/lib/squid
+
+# ============================================
+# END OF CONFIG
+# ============================================
