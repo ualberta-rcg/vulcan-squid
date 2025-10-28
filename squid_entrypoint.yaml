@@ -62,7 +62,7 @@ data:
     set -eu
 
     OUT_FILE="/etc/squid/conf.d/99-peers.conf"
-    MYIP="${MY_POD_IP:-$(hostname -i | awk '{print $1}')}"
+    MYIP="${MY_POD_IP:-$(hostname -I | tr ' ' '\n' | grep '172.26.92')}"
     HTTP_PORT=3128
 
     # Static peer list
