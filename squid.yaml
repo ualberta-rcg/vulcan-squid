@@ -108,11 +108,8 @@ spec:
             timeoutSeconds: 10
             failureThreshold: 3
           readinessProbe:
-            exec:
-              command:
-                - /bin/sh
-                - -c
-                - "curl -f http://localhost:3128/squid-internal-mgr/info || exit 1"
+            tcpSocket:
+              port: 3128
             initialDelaySeconds: 15
             periodSeconds: 10
             timeoutSeconds: 5
@@ -128,7 +125,7 @@ spec:
               
               # Generate static peer configuration before startup
               echo "Initializing peer configuration..."
-              /bin/sh /opt/peer-discovery.sh
+              /bin/sh /opt/peer-discovery.sh || true
               
               # Start Squid using the entrypoint script (handles logging and cache init)
               exec /usr/local/bin/entrypoint.sh -f /etc/squid/squid.conf -NYC
