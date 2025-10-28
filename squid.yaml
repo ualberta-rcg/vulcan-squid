@@ -119,10 +119,6 @@ spec:
             - /bin/sh
             - '-c'
             - |
-              # Remove default rock.conf that overrides our settings
-              echo "Removing conflicting default config files..."
-              rm -f /etc/squid/conf.d/rock.conf 2>/dev/null || true
-              
               # Generate static peer configuration before startup
               echo "Initializing peer configuration..."
               /bin/sh /opt/peer-discovery.sh || true

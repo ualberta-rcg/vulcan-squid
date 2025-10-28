@@ -30,7 +30,6 @@ data:
     # ============================================
     
     workers 4
-    max_filedescriptors 32768
     
     client_persistent_connections on
     server_persistent_connections on
