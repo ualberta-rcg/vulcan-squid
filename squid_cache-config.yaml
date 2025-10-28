@@ -10,7 +10,7 @@ data:
     # ============================================
     # === STORAGE & SIZES ========================
     # ============================================
-    
+
     cache_dir aufs /var/lib/squid 100000 32 512     # 100 GB per node/pod (matches LV size)
     cache_mem 24576 MB                              # 24 GB RAM cache for hot objects and metadata
     maximum_object_size 20480 MB
