@@ -63,6 +63,12 @@ data:
     # CVMFS objects: prefer revalidation without refetch
     refresh_pattern -i ^/cvmfs/.*      1440 90% 43200 reload-into-ims ignore-reload
     
+    # Debian/Ubuntu package management (best practice for repository caching)
+    refresh_pattern \/(Packages|Sources)(|\.bz2|\.gz|\.xz)$ 0 0% 0 refresh-ims
+    refresh_pattern \/Release(|\.gpg)$ 0 0% 0 refresh-ims
+    refresh_pattern \/InRelease$ 0 0% 0 refresh-ims
+    refresh_pattern \/(Translation-.*)(|\.bz2|\.gz|\.xz)$ 0 0% 0 refresh-ims
+    
     # Common software/data artifacts
     refresh_pattern \.(rpm|deb|tar|gz|bz2|xz|zip|iso|img|whl|egg|dll|so|bin|run)$ 1440 90% 43200 reload-into-ims
     refresh_pattern \.(dat|data|json|xml|yaml|yml)$ 1440 90% 43200 reload-into-ims
@@ -71,6 +77,9 @@ data:
     refresh_pattern \.(pdf|doc|docx|ppt|pptx)$ 1440 90% 43200 reload-into-ims
     refresh_pattern \.(jpg|jpeg|png|gif|bmp|tiff|css|js|html|htm)$ 1440 90% 43200 reload-into-ims
     refresh_pattern . 0 20% 4320 reload-into-ims    # default heuristic freshness (up to 3 days)
+    
+    # Minimum expiry time (important for CVMFS)
+    minimum_expiry_time 0 seconds
     
     
     # ============================================
