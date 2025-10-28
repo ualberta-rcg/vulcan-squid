@@ -1,6 +1,10 @@
-# vulcan-squid
+<img src="https://www.ualberta.ca/en/toolkit/media-library/homepage-assets/ua_logo_green_rgb.png" alt="University of Alberta Logo" width="50%" />
 
-Kubernetes Squid proxy deployment for HPC clusters. Provides high-performance caching with peer coordination for CVMFS and research computing workloads at the University of Alberta.
+# Squid Deployment for Vulcan HPC Cluster
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
+
+**Maintained by:** Karim Ali ([kali2@ualberta.ca](mailto:kali2@ualberta.ca))
 
 ## 🧰 Description
 
@@ -77,10 +81,30 @@ curl http://cvmfs-stratum-one.cern.ch/cvmfs/
 
 ## 🤝 Support
 
-This project is provided as-is. Feel free to open an issue or email for U of A related deployments.
+Many Bothans died to bring us this information. This project is provided as-is, but reasonable questions may be answered based on my coffee intake or mood. ;)
+
+Feel free to open an issue or email **[kali2@ualberta.ca](mailto:kali2@ualberta.ca)** for U of A related deployments.
 
 ## 📜 License
 
-MIT License - see [LICENSE](LICENSE) file.
+This project is released under the **MIT License** - one of the most permissive open-source licenses available.
 
-**Maintained by:** University of Alberta Research Computing Group
+**What this means:**
+- ✅ Use it for anything (personal, commercial, whatever)
+- ✅ Modify it however you want
+- ✅ Distribute it freely
+- ✅ Include it in proprietary software
+
+**The only requirement:** Keep the copyright notice somewhere in your project.
+
+That's it! No other strings attached. The MIT License is trusted by major projects worldwide and removes virtually all legal barriers to using this code.
+
+**Full license text:** [MIT License](./LICENSE)
+
+## 🧠 About University of Alberta Research Computing
+
+The [Research Computing Group](https://www.ualberta.ca/en/information-services-and-technology/research-computing/index.html) supports high-performance computing, data-intensive research, and advanced infrastructure for researchers at the University of Alberta and across Canada.
+
+We help design and operate compute environments that power innovation — from AI training clusters to national research infrastructure.
+
+
