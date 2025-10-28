@@ -48,7 +48,6 @@ data:
     
     # Include additional configuration files
     include /etc/squid/conf.d/*.conf
-    include /tmp/squid-conf/*.conf
     
     # Deny all other access
     http_access deny all
@@ -56,105 +55,27 @@ data:
     # HTTP proxy port with high concurrency settings
     http_port 3128
 
-    # ICP port for cache peer
-    icp_port 3130
-    icp_access allow localnet
-    icp_access deny all
-    
-    # Core dump directory
-    coredump_dir /var/spool/squid
-    
     # PID file location
     pid_filename /tmp/squid.pid
-    
-    # High concurrency settings for HPC cluster
-    max_filedescriptors 65536
-    client_persistent_connections on
-    server_persistent_connections on
-    persistent_request_timeout 60 seconds
-    client_lifetime 1 hour
-    
-    # Logging to stdout/stderr for container logging
-    access_log stdio:/dev/stdout squid
-    cache_log stdio:/dev/stderr
-    cache_store_log stdio:/dev/stderr
-    
-    # Refresh patterns for different content types
-    refresh_pattern ^ftp:           1440    20%     10080
-    refresh_pattern ^gopher:        1440    0%      1440
-    refresh_pattern -i (/cgi-bin/|\?) 0     0%      0
-    
-    # Package manager refresh patterns (apt/deb repositories)
-    refresh_pattern \/(Packages|Sources)(|\.bz2|\.gz|\.xz)$ 0 0% 0 refresh-ims
-    refresh_pattern \/Release(|\.gpg)$ 0 0% 0 refresh-ims
-    refresh_pattern \/InRelease$ 0 0% 0 refresh-ims
-    refresh_pattern \/(Translation-.*)(|\.bz2|\.gz|\.xz)$ 0 0% 0 refresh-ims
-    
-    # Default refresh pattern
-    refresh_pattern .               0       20%     4320
   peer-discovery.sh: |
     #!/bin/sh
     set -eu
 
-    SERVICE_DNS="${SERVICE_DNS:-squid-peers.squid-standard.svc.cluster.local}"
-    HTTP_PORT="${HTTP_PORT:-3128}"
-    ICP_PORT="${ICP_PORT:-3130}"   # if using HTCP set 4827 and add " htcp" below
-    INTERVAL="${INTERVAL:-15}"
-    OUT_DIR="/tmp/squid-conf"
-    OUT_FILE="$OUT_DIR/99-peers.conf"
-    TMP_FILE="$(mktemp)"
+    OUT_FILE="/etc/squid/conf.d/99-peers.conf"
     MYIP="${MY_POD_IP:-$(hostname -i | awk '{print $1}')}"
+    HTTP_PORT=3128
 
-    mkdir -p "$OUT_DIR"
-    [ -f "$OUT_FILE" ] || : > "$OUT_FILE"
+    # Static peer list
+    PEERS="172.26.92.2 172.26.92.3 172.26.92.4 172.26.92.5 172.26.92.6"
 
-    resolve_ips() {
-      # Prefer getent; fall back to nslookup/host/dig
-      if command -v getent >/dev/null 2>&1; then
-        getent hosts "$SERVICE_DNS" | awk '{print $1}'
-      elif command -v nslookup >/dev/null 2>&1; then
-        nslookup -type=A "$SERVICE_DNS" 2>/dev/null | awk '/^Address: /{print $2}'
-      elif command -v host >/dev/null 2>&1; then
-        host "$SERVICE_DNS" 2>/dev/null | awk '/ has address /{print $4}'
-      elif command -v dig >/dev/null 2>&1; then
-        dig +short A "$SERVICE_DNS"
-      else
-        echo "No DNS tool found" >&2
-        return 1
-      fi
-    }
+    # Build file, skipping self
+    {
+      echo "# Peers in the Vulcan cache cluster"
+      for ip in $PEERS; do
+        [ "$ip" = "$MYIP" ] && continue
+        printf 'cache_peer %s sibling %s 0 proxy-only\n' "$ip" "$HTTP_PORT"
+      done
+    } > "$OUT_FILE"
 
-    render_file() {
-      ips="$(resolve_ips | sort -u | grep -v -F "$MYIP")"
-      if [ -n "$ips" ]; then
-        {
-          for ip in $ips; do
-            printf 'cache_peer %s sibling %s %s proxy-only\n' "$ip" "$HTTP_PORT" "$ICP_PORT"
-          done
-        } > "$TMP_FILE"   # single redirection here, not inside the loop
-      else
-        echo "# No peers found" > "$TMP_FILE"
-      fi
-    }
-
-    # Initial render
-    echo "Starting peer discovery for $SERVICE_DNS"
-    echo "My IP: $MYIP"
-    render_file
-    mv "$TMP_FILE" "$OUT_FILE"
-    echo "Generated peer config:"
+    echo "Generated peers file:"
     cat "$OUT_FILE"
-
-    # Loop with change detection
-    while sleep "$INTERVAL"; do
-      TMP_FILE="$(mktemp)"
-      if render_file && { [ ! -f "$OUT_FILE" ] || ! cmp -s "$TMP_FILE" "$OUT_FILE"; }; then
-        mv "$TMP_FILE" "$OUT_FILE"
-        # Only try to reconfigure if Squid is running
-        if pgrep squid >/dev/null 2>&1; then
-          squid -k reconfigure || true
-        fi
-      else
-        rm -f "$TMP_FILE"
-      fi
-    done

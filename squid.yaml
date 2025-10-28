@@ -38,8 +38,6 @@ spec:
                 fieldRef:
                   apiVersion: v1
                   fieldPath: status.podIP
-            - name: SERVICE_DNS
-              value: squid-peers.squid-standard.svc.cluster.local
           
           
           # Security context - hardened for production
@@ -124,50 +122,16 @@ spec:
             - /bin/sh
             - '-c'
             - |
-              # Initialize cache directories if they don't exist
-              squid -z -f /etc/squid/squid.conf || true
-              # Wait for DNS and other pods to be ready
-              echo "Waiting for DNS and peers to be ready..."
-              sleep 10
+              # Remove default rock.conf that overrides our settings
+              echo "Removing conflicting default config files..."
+              rm -f /etc/squid/conf.d/rock.conf 2>/dev/null || true
               
-              # Run peer discovery with retry logic
-              echo "Running initial peer discovery..."
-              SERVICE_DNS="squid-peers.squid-standard.svc.cluster.local"
-              HTTP_PORT="3128"
-              ICP_PORT="3130"
-              MYIP="${MY_POD_IP:-$(hostname -i | awk '{print $1}')}"
-              OUT_DIR="/tmp/squid-conf"
-              OUT_FILE="$OUT_DIR/99-peers.conf"
-              mkdir -p "$OUT_DIR"
+              # Generate static peer configuration before startup
+              echo "Initializing peer configuration..."
+              /bin/sh /opt/peer-discovery.sh
               
-              # Retry peer discovery up to 5 times
-              for attempt in 1 2 3 4 5; do
-                echo "Peer discovery attempt $attempt..."
-                ips="$(getent hosts "$SERVICE_DNS" 2>/dev/null | awk '{print $1}' | sort -u | grep -v -F "$MYIP")"
-                if [ -n "$ips" ]; then
-                  {
-                    for ip in $ips; do
-                      printf 'cache_peer %s sibling %s %s proxy-only\n' "$ip" "$HTTP_PORT" "$ICP_PORT"
-                    done
-                  } > "$OUT_FILE"
-                  echo "Generated peer config:"
-                  cat "$OUT_FILE"
-                  break
-                else
-                  echo "No peers found on attempt $attempt, retrying in 5 seconds..."
-                  sleep 5
-                fi
-              done
-              
-              # If still no peers, create empty config
-              if [ ! -s "$OUT_FILE" ]; then
-                echo "# No peers found after retries" > "$OUT_FILE"
-                echo "No peers found, will retry in background"
-              fi
-              # Start peer discovery in background for monitoring
-              /bin/sh /opt/peer-discovery.sh &
-              # Start Squid
-              exec entrypoint.sh -f /etc/squid/squid.conf -NYC
+              # Start Squid using the entrypoint script (handles logging and cache init)
+              exec /usr/local/bin/entrypoint.sh -f /etc/squid/squid.conf -NYC
       
       # Pod configuration
       restartPolicy: Always
