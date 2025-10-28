@@ -66,7 +66,7 @@ spec:
             limits:
               memory: "32Gi"     # 32GB maximum (adjust based on node memory)
               cpu: "4000m"       # 4 CPU cores maximum
-              ephemeral-storage: "500Gi" # Cache storage maximum
+              ephemeral-storage: "100Gi" # Cache storage maximum
           
           # Volume mounts for configuration and cache
           volumeMounts:
