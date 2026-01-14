@@ -1,16 +1,21 @@
 #!/bin/bash
-
 # Host Setup Script for Squid Proxy on HPC Cluster
 # Run this on each node before deploying Squid
-
 set -e
 
 echo "🔧 Setting up Squid user and directories on host..."
 
-# Create Squid user and group with specific UID/GID to match container
+# Create Squid group first, then user with specific UID/GID to match container
+if ! getent group squid >/dev/null 2>&1; then
+    echo "Creating squid group with GID 3128..."
+    groupadd -r -g 3128 squid
+else
+    echo "Squid group already exists"
+fi
+
 if ! id -u squid >/dev/null 2>&1; then
-    echo "Creating squid user with UID/GID 3128:3128..."
-    useradd -r -s /bin/false -d /var/lib/squid -c "Squid proxy" -u 3128 -g 3128 squid
+    echo "Creating squid user with UID 3128..."
+    useradd -r -s /bin/false -d /var/lib/squid -c "Squid proxy" -u 3128 -g squid squid
 else
     echo "Squid user already exists"
     # Check if UID/GID matches container requirements
@@ -29,7 +34,7 @@ mkdir -p /var/lib/squid/cache/{00,01,02,03,04,05,06,07,08,09,0A,0B,0C,0D,0E,0F}
 mkdir -p /var/lib/squid/cache/{10,11,12,13,14,15,16,17,18,19,1A,1B,1C,1D,1E,1F}
 
 # Set proper ownership and permissions
-chown -R 3128:3128 /var/lib/squid
+chown -R squid:squid /var/lib/squid
 chmod -R 755 /var/lib/squid
 
 echo "✅ Host setup complete!"
